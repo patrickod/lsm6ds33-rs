@@ -3,7 +3,7 @@ let
 
   nixpkgs = fetchGit {
     url = "https://github.com/patrickod/nixpkgs.git";
-    rev = "8ec0706f5e6652ddb56a6370aaba80b90315b872";
+    rev = "458f2ae977948a8aaf930bed9af79eb69e76b7ae";
     ref = "personal";
   };
 
@@ -25,6 +25,10 @@ in
   pkgs.mkShell {
     name = "rust-dev";
     buildInputs = [
+      pkgs.probe-run
+      pkgs.flip-link
+      pkgs.gcc-arm-embedded
+      pkgs.cargo-hf2
       rust
     ];
   }

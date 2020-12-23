@@ -65,7 +65,7 @@ impl<I2C,E> LSM6DS33<I2C> where I2C: WriteRead<Error=E> + Write<Error=E>,
         Ok(lsm6ds33)
     }
 
-    fn who_am_i(&mut self) -> Result<u8,Error> {
+    pub fn who_am_i(&mut self) -> Result<u8,Error> {
         self.register_read(Register::WHO_AM_I)
     }
 

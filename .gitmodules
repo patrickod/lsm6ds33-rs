@@ -1,0 +1,3 @@
+[submodule "feather-test"]
+	path = feather-test
+	url = ./feather-test/
