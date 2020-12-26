@@ -1,5 +1,8 @@
+use bitflags::bitflags;
+
+#[derive(Clone, Copy)]
 #[allow(non_camel_case_types, dead_code)]
-pub(crate) enum Register {
+pub enum Register {
     // Self ID
     WHO_AM_I   = 0x0F,
 
@@ -94,5 +97,66 @@ pub(crate) enum Register {
 impl Register {
     pub fn address(self) -> u8 {
         self as u8
+    }
+}
+
+bitflags! {
+    #[allow(non_camel_case_types)]
+    pub struct CTRL3_CBits: u8 {
+        const BOOT = 0b1000_0000;
+        const BDU = 0b0100_0000;
+        const H_LACTIVE = 0b0010_0000;
+        const PP_OD = 0b0001_0000;
+        const SIM = 0b0000_1000;
+        const IF_INC = 0b0000_0100;
+        const BIG_ENDIAN = 0b0000_0010;
+        const SW_RESET = 0b0000_0001;
+    }
+}
+
+bitflags! {
+    #[allow(non_camel_case_types)]
+    pub struct CTRL1_XLBits: u8 {
+        /// Accelerometer Scale
+        const SCALE2G  = 0b0000_0000;
+        const SCALE4G  = 0b0000_1000;
+        const SCALE8G  = 0b0000_1100;
+        const SCALE16G = 0b0000_0100;
+
+        /// Accelerometer Output Data Rates (Hz)
+        const ODR_12HZ    = 0b0001_0000;
+        const ODR_26HZ    = 0b0010_0000;
+        const ODR_52HZ    = 0b0011_0000;
+        const ODR_104HZ   = 0b0100_0000;
+        const ODR_208HZ   = 0b0101_0000;
+        const ODR_416HZ   = 0b0110_0000;
+        const ODR_833HZ   = 0b0111_0000;
+        const ODR_1_66KHZ = 0b1000_0000;
+        const ODR_3_33KHZ = 0b1001_0000;
+        const ODR_6_66KHZ = 0b1010_0000;
+    }
+}
+
+bitflags! {
+    #[allow(non_camel_case_types)]
+    pub struct CTRL2_GBits: u8 {
+        /// Gyroscope Full Scale Detection (degrees/s)
+        const FS125DPS  = 0b0000_0010;
+        const FS250DPS  = 0b0000_0000;
+        const FS500DPS  = 0b0000_0100;
+        const FS1000DPS = 0b0000_1000;
+        const FS2000DPS = 0b0000_1100;
+
+        /// Gyroscope Output Data Rates (Hz)
+        const ODR_12HZ    = 0b0001_0000;
+        const ODR_26HZ    = 0b0010_0000;
+        const ODR_52HZ    = 0b0011_0000;
+        const ODR_104HZ   = 0b0100_0000;
+        const ODR_208HZ   = 0b0101_0000;
+        const ODR_416HZ   = 0b0110_0000;
+        const ODR_833HZ   = 0b0111_0000;
+        const ODR_1_66KHZ = 0b1000_0000;
+        const ODR_3_33KHZ = 0b1001_0000;
+        const ODR_6_66KHZ = 0b1010_0000;
     }
 }

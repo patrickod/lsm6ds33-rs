@@ -10,6 +10,9 @@ license = "MIT"
 [dependencies]
 embedded-hal = "0.2.4"
 panic-rtt-core = { version = "0.2.1", optional = true }
+bitflags = "1.0.4"
+defmt = { version =  "0.1.2", optional = true }
 
 [features]
 rttdebug = ["panic-rtt-core"]
+defmt-default = ["defmt"]
