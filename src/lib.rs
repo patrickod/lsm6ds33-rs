@@ -16,7 +16,7 @@ use register::*;
 
 pub enum DataRate {
     ODR12_5Hz,
-    ODR25Hz,
+    ODR26Hz,
     ODR52Hz,
     ODR104Hz,
     ODR208Hz,
@@ -114,20 +114,79 @@ where
         self.soft_reset()?;
 
         // Enable Block Data Update operation (vs FIFO modes)
-        self.dev.mutate(Register::CTRL3_C, |r| r | CTRL3_CBits::BDU.bits())?;
+        self.dev
+            .mutate(Register::CTRL3_C, |r| r | CTRL3_CBits::BDU.bits())?;
 
-        // Enable 2G accelerometer scale @ 26Hz
-        self.dev
-            .mutate(Register::CTRL1_XL, |r| r | CTRL1_XLBits::SCALE2G.bits())?;
-        self.dev
-            .mutate(Register::CTRL1_XL, |r| r | CTRL1_XLBits::ODR_26HZ.bits())?;
+        self.set_accelerometer_data_rate(DataRate::ODR12_5Hz)?;
+        self.set_accelerometer_scale(AccelerometerScale::Scale2g)?;
 
-        // enable gyroscope 2000dps @ 26Hz
-        self.dev
-            .mutate(Register::CTRL2_G, |r| r | CTRL2_GBits::FS2000DPS.bits())?;
-        self.dev
-            .mutate(Register::CTRL2_G, |r| r | CTRL2_GBits::ODR_26HZ.bits())?;
+        self.set_gyroscope_data_rate(DataRate::ODR12_5Hz)?;
+        self.set_gyroscope_scale(GyroscopeScale::Scale125Dps)?;
 
         Ok(())
+    }
+
+    /// Specify the Ouput Data Rate of the Accelerometer
+    pub fn set_accelerometer_data_rate(&mut self, rate: DataRate) -> Result<(), E> {
+        let flag = match rate {
+            DataRate::ODR12_5Hz => CTRL1_XLBits::ODR12_5Hz,
+            DataRate::ODR26Hz => CTRL1_XLBits::ODR26Hz,
+            DataRate::ODR52Hz => CTRL1_XLBits::ODR52Hz,
+            DataRate::ODR104Hz => CTRL1_XLBits::ODR104Hz,
+            DataRate::ODR208Hz => CTRL1_XLBits::ODR208Hz,
+            DataRate::ODR416Hz => CTRL1_XLBits::ODR416Hz,
+            DataRate::ODR833Hz => CTRL1_XLBits::ODR833Hz,
+            DataRate::ODR1_66Khz => CTRL1_XLBits::ODR1_66Khz,
+            DataRate::ODR3_33Khz => CTRL1_XLBits::ODR3_33Khz,
+            DataRate::ODR6_66Khz => CTRL1_XLBits::ODR6_66Khz,
+            _ => CTRL1_XLBits::ODR12_5Hz,
+        };
+        self.dev
+            .mutate(Register::CTRL1_XL, |r| (r & !0b1111_0000) | flag.bits())
+    }
+
+    /// Specify the Accelerometer measurement scale
+    pub fn set_accelerometer_scale(&mut self, scale: AccelerometerScale) -> Result<(), E> {
+        let flag = match scale {
+            AccelerometerScale::Scale2g => CTRL1_XLBits::Scale2G,
+            AccelerometerScale::Scale4g => CTRL1_XLBits::Scale4G,
+            AccelerometerScale::Scale8g => CTRL1_XLBits::Scale8G,
+            AccelerometerScale::Scale16g => CTRL1_XLBits::Scale16G,
+            _ => CTRL1_XLBits::Scale2G,
+        };
+        self.dev
+            .mutate(Register::CTRL1_XL, |r| (r & !0b0000_1100) | flag.bits())
+    }
+
+    /// Specify the Output Data Rate for the Gyroscope
+    pub fn set_gyroscope_data_rate(&mut self, rate: DataRate) -> Result<(), E> {
+        let flag = match rate {
+            DataRate::ODR12_5Hz => CTRL2_GBits::ODR12_5Hz,
+            DataRate::ODR26Hz => CTRL2_GBits::ODR26Hz,
+            DataRate::ODR52Hz => CTRL2_GBits::ODR52Hz,
+            DataRate::ODR104Hz => CTRL2_GBits::ODR104Hz,
+            DataRate::ODR208Hz => CTRL2_GBits::ODR208Hz,
+            DataRate::ODR416Hz => CTRL2_GBits::ODR416Hz,
+            DataRate::ODR833Hz => CTRL2_GBits::ODR833Hz,
+            DataRate::ODR1_66Khz => CTRL2_GBits::ODR1_66Khz,
+            DataRate::ODR3_33Khz => CTRL2_GBits::ODR3_33Khz,
+            DataRate::ODR6_66Khz => CTRL2_GBits::ODR6_66Khz,
+            _ => CTRL2_GBits::ODR12_5Hz,
+        };
+        self.dev
+            .mutate(Register::CTRL2_G, |r| (r & !0b1111_0000) | flag.bits())
+    }
+
+    /// Specify the full scale for Gyroscope measurements
+    pub fn set_gyroscope_scale(&mut self, scale: GyroscopeScale) -> Result<(), E> {
+        let flag = match scale {
+            GyroscopeScale::Scale125Dps => CTRL2_GBits::FS125DPS,
+            GyroscopeScale::Scale250Dps => CTRL2_GBits::FS250DPS,
+            GyroscopeScale::Scale500Dps => CTRL2_GBits::FS500DPS,
+            GyroscopeScale::Scale1000Dps => CTRL2_GBits::FS1000DPS,
+            GyroscopeScale::Scale2000Dps => CTRL2_GBits::FS2000DPS,
+        };
+        self.dev
+            .mutate(Register::CTRL2_G, |r| (r & !0b0000_1111) | flag.bits())
     }
 }
