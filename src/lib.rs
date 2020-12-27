@@ -77,9 +77,6 @@ where
             gyroscope_scale: GyroscopeScale::Scale250Dps,
         };
 
-        #[cfg(feature = "defmt-default")]
-        defmt::info!("instantiating LSM6DS33 & checking WHO_AM_I");
-
         match lsm6ds33.who_am_i() {
             Ok(id) => {
                 if id != LSM6D33_CHIP_ID {
@@ -99,16 +96,17 @@ where
 
     fn soft_reset(&mut self) -> Result<(), E> {
         self.dev
-            .write(Register::CTRL3_C, CTRL3_CBits::SW_RESET.bits())?;
+            .mutate(Register::CTRL3_C, |r| r | CTRL3_CBits::SW_RESET.bits())?;
 
+        // Await boot signaled by SW_RESET returning to 0
         loop {
             let ctrl = self.dev.read(Register::CTRL3_C)?;
             let flags = CTRL3_CBits::from_bits_truncate(ctrl);
+
             if !flags.contains(CTRL3_CBits::SW_RESET) {
-                break;
+                return Ok(());
             }
         }
-        Ok(())
     }
 
     fn initialize(&mut self) -> Result<(), E> {
@@ -116,19 +114,19 @@ where
         self.soft_reset()?;
 
         // Enable Block Data Update operation (vs FIFO modes)
-        self.dev.write(Register::CTRL3_C, CTRL3_CBits::BDU.bits())?;
+        self.dev.mutate(Register::CTRL3_C, |r| r | CTRL3_CBits::BDU.bits())?;
 
         // Enable 2G accelerometer scale @ 26Hz
         self.dev
-            .mutate(Register::CTRL1_XL, |r| r & CTRL1_XLBits::SCALE2G.bits())?;
+            .mutate(Register::CTRL1_XL, |r| r | CTRL1_XLBits::SCALE2G.bits())?;
         self.dev
-            .mutate(Register::CTRL1_XL, |r| r & CTRL1_XLBits::ODR_26HZ.bits())?;
+            .mutate(Register::CTRL1_XL, |r| r | CTRL1_XLBits::ODR_26HZ.bits())?;
 
         // enable gyroscope 2000dps @ 26Hz
         self.dev
-            .mutate(Register::CTRL2_G, |r| r & CTRL2_GBits::FS2000DPS.bits())?;
+            .mutate(Register::CTRL2_G, |r| r | CTRL2_GBits::FS2000DPS.bits())?;
         self.dev
-            .mutate(Register::CTRL2_G, |r| r & CTRL2_GBits::ODR_26HZ.bits())?;
+            .mutate(Register::CTRL2_G, |r| r | CTRL2_GBits::ODR_26HZ.bits())?;
 
         Ok(())
     }
