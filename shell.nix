@@ -7,28 +7,18 @@ let
     ref = "personal";
   };
 
-  mozilla-overlay =
-    import (builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz);
+  mozilla-overlay = import (builtins.fetchTarball
+    "https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz");
 
-  pkgs = import nixpkgs {
-    overlays = [ mozilla-overlay ];
-  };
+  pkgs = import nixpkgs { overlays = [ mozilla-overlay ]; };
 
   rust = pkgs.rustChannels.stable.rust.override {
-    extensions = [ "rust-src" ];
-    targets = [
-      "thumbv7em-none-eabihf"
-    ];
+    extensions = [ "rust-src" "clippy-preview" ];
+    targets = [ "thumbv7em-none-eabihf" ];
   };
 
-in
-  pkgs.mkShell {
-    name = "rust-dev";
-    buildInputs = [
-      pkgs.probe-run
-      pkgs.flip-link
-      pkgs.gcc-arm-embedded
-      pkgs.cargo-hf2
-      rust
-    ];
-  }
+in pkgs.mkShell {
+  name = "rust-dev";
+  buildInputs =
+    [ pkgs.probe-run pkgs.flip-link pkgs.gcc-arm-embedded pkgs.cargo-hf2 rust ];
+}
